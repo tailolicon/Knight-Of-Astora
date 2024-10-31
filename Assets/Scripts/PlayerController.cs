@@ -104,6 +104,7 @@ public class PlayerController : MonoBehaviour
             isOnGround = false;
             playerAnimation.SetTrigger("Jump");
             playerRb.velocity = new Vector2(playerRb.velocity.x, jumpForce);
+            
         }
 
         // Attack

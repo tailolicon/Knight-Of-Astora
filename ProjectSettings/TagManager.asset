@@ -54,3 +54,6 @@ TagManager:
   - name: Grass
     uniqueID: 208140317
     locked: 0
+  - name: Water
+    uniqueID: 2792951743
+    locked: 0
