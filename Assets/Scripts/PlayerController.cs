@@ -17,9 +17,9 @@ public class PlayerController : MonoBehaviour
     private float timeSinceAttack;
 
     //Player attributes
-    readonly float jumpForce = 7f;
-    readonly float playerSpeed = 10;
-    readonly float rollForce = 6.5f;
+    [SerializeField] private float jumpForce = 7f;
+    [SerializeField] private float playerSpeed = 10;
+    [SerializeField] private float rollForce = 6.5f;
     //readonly int hitPoints = 5;
     //public float stamina = 10;
 
