@@ -8,7 +8,7 @@ public class PlayerController : MonoBehaviour
     private int facingDirection;
 
     private bool isOnGround;
-    //private bool isAttack;
+    private bool isBlocking;
     private bool isRolling;
     private float rollDuration = 0.5f;
     private float rollCurrentTime;
@@ -17,8 +17,8 @@ public class PlayerController : MonoBehaviour
     private float timeSinceAttack;
 
     //Player attributes
-    [SerializeField] private float jumpForce = 7f;
-    [SerializeField] private float playerSpeed = 10;
+    [SerializeField] private float jumpForce = 3f;
+    [SerializeField] private float playerSpeed = 5;
     [SerializeField] private float rollForce = 6.5f;
     //readonly int hitPoints = 5;
     //public float stamina = 10;
@@ -80,8 +80,11 @@ public class PlayerController : MonoBehaviour
         }
 
         // Move
-        if (!isRolling)
-            playerRb.velocity = new Vector2(horizontalInput * playerSpeed, playerRb.velocity.y);
+        if (!isRolling && !isBlocking)
+        {
+            //playerRb.velocity = new Vector2(horizontalInput * playerSpeed, playerRb.velocity.y);
+            transform.Translate(new Vector2(horizontalInput * playerSpeed * Time.deltaTime, 0));
+        }
 
         // Run
         if (horizontalInput != 0)
@@ -123,17 +126,23 @@ public class PlayerController : MonoBehaviour
         {
             isRolling = true;
             playerAnimation.SetTrigger("Roll");
-            playerRb.velocity = new Vector2(facingDirection * rollForce, playerRb.velocity.y);
+            //playerRb.velocity = new Vector2(facingDirection * rollForce, playerRb.velocity.y);
+            transform.Translate(new Vector2(rollForce * Time.deltaTime * facingDirection, 0));
         }
 
         // Block
         if (Input.GetMouseButtonDown(1) && isOnGround && !isRolling)
         {
+            isBlocking = true;
             playerAnimation.SetTrigger("Block");
             playerAnimation.SetBool("IdleBlock", true);
         }
         else if (Input.GetMouseButtonUp(1))
+        {
+            isBlocking = false;
             playerAnimation.SetBool("IdleBlock", false);
+        }
+            
 
     }
 
