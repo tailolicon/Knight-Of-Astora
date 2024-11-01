@@ -718,7 +718,7 @@ Transform:
   m_GameObject: {fileID: 519420028}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -16.25, y: -2.37, z: -10}
+  m_LocalPosition: {x: -17.98, y: 0.08, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -3428,7 +3428,7 @@ Transform:
   m_GameObject: {fileID: 2093578991}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -16.25, y: -2.37, z: -10}
+  m_LocalPosition: {x: -17.98, y: 0.08, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -3443,21 +3443,45 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 383840766318048394, guid: 7d5bff46aefc49548a4a028a71276dba, type: 3}
+      propertyPath: m_FlipX
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 383840766318048394, guid: 7d5bff46aefc49548a4a028a71276dba, type: 3}
+      propertyPath: m_FlipY
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 539999121136366086, guid: 7d5bff46aefc49548a4a028a71276dba, type: 3}
       propertyPath: m_Name
       value: Player
       objectReference: {fileID: 0}
     - target: {fileID: 970128306319859662, guid: 7d5bff46aefc49548a4a028a71276dba, type: 3}
+      propertyPath: dashed
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 970128306319859662, guid: 7d5bff46aefc49548a4a028a71276dba, type: 3}
+      propertyPath: canDash
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 970128306319859662, guid: 7d5bff46aefc49548a4a028a71276dba, type: 3}
+      propertyPath: dashTime
+      value: 0.2
+      objectReference: {fileID: 0}
+    - target: {fileID: 970128306319859662, guid: 7d5bff46aefc49548a4a028a71276dba, type: 3}
       propertyPath: dashSpeed
-      value: 300
+      value: 25
+      objectReference: {fileID: 0}
+    - target: {fileID: 970128306319859662, guid: 7d5bff46aefc49548a4a028a71276dba, type: 3}
+      propertyPath: dashCooldown
+      value: 0.35
       objectReference: {fileID: 0}
     - target: {fileID: 6597577238280649097, guid: 7d5bff46aefc49548a4a028a71276dba, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -16.25
+      value: -17.98
       objectReference: {fileID: 0}
     - target: {fileID: 6597577238280649097, guid: 7d5bff46aefc49548a4a028a71276dba, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -2.37
+      value: 0.08
       objectReference: {fileID: 0}
     - target: {fileID: 6597577238280649097, guid: 7d5bff46aefc49548a4a028a71276dba, type: 3}
       propertyPath: m_LocalPosition.z
