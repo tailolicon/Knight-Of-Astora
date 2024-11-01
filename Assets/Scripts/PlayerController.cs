@@ -82,8 +82,8 @@ public class PlayerController : MonoBehaviour
         // Move
         if (!isRolling && !isBlocking)
         {
-            //playerRb.velocity = new Vector2(horizontalInput * playerSpeed, playerRb.velocity.y);
-            transform.Translate(new Vector2(horizontalInput * playerSpeed * Time.deltaTime, 0));
+            playerRb.velocity = new Vector2(horizontalInput * playerSpeed, playerRb.velocity.y);
+            //transform.Translate(new Vector2(horizontalInput * playerSpeed * Time.deltaTime, 0));
         }
 
         // Run
@@ -98,6 +98,11 @@ public class PlayerController : MonoBehaviour
         }
 
         // Jump
+        if(Input.GetKeyUp(KeyCode.Space) && playerRb.velocity.y > 0)
+        {
+            playerRb.velocity = new Vector2(playerRb.velocity.x, 0);
+        }
+
         if (Input.GetKeyDown(KeyCode.Space) && isOnGround)
         {
 
@@ -127,14 +132,15 @@ public class PlayerController : MonoBehaviour
         {
             isRolling = true;
             playerAnimation.SetTrigger("Roll");
-            //playerRb.velocity = new Vector2(facingDirection * rollForce, playerRb.velocity.y);
-            transform.Translate(new Vector2(rollForce * Time.deltaTime * facingDirection, 0));
+            playerRb.velocity = new Vector2(facingDirection * rollForce, playerRb.velocity.y);
+            //transform.Translate(new Vector2(rollForce * Time.deltaTime * facingDirection, 0));
         }
 
         // Block
         if (Input.GetMouseButtonDown(1) && isOnGround && !isRolling)
         {
             isBlocking = true;
+            playerRb.velocity = Vector2.zero;
             playerAnimation.SetTrigger("Block");
             playerAnimation.SetBool("IdleBlock", true);
         }

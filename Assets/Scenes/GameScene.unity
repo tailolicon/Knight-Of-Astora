@@ -3201,7 +3201,7 @@ Transform:
   m_GameObject: {fileID: 1573526307}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: -0.83}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -3449,7 +3449,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 970128306319859662, guid: 7d5bff46aefc49548a4a028a71276dba, type: 3}
       propertyPath: jumpForce
-      value: 5
+      value: 7
+      objectReference: {fileID: 0}
+    - target: {fileID: 970128306319859662, guid: 7d5bff46aefc49548a4a028a71276dba, type: 3}
+      propertyPath: playerSpeed
+      value: 8
       objectReference: {fileID: 0}
     - target: {fileID: 6597577238280649097, guid: 7d5bff46aefc49548a4a028a71276dba, type: 3}
       propertyPath: m_LocalPosition.x
