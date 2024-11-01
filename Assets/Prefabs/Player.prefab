@@ -172,9 +172,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 67cb7d7d956b3ab488a15947fc1f6476, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  jumpForce: 3.5
-  playerSpeed: 5.5
-  rollForce: 4
+  canDash: 0
+  dashed: 0
+  isDashing: 0
+  maxAirJump: 1
+  jumpForce: 7
+  playerSpeed: 8
+  rollForce: 6
+  dashSpeed: 100
+  dashTime: 0.3
+  dashCooldown: 0.5
 --- !u!95 &56074413742692360
 Animator:
   serializedVersion: 5
