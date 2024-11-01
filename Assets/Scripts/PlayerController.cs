@@ -53,7 +53,11 @@ public class PlayerController : MonoBehaviour
             rollCurrentTime += Time.deltaTime;
         // Disable rolling if timer extends duration
         if (rollCurrentTime > rollDuration)
+        {
             isRolling = false;
+            rollCurrentTime = 0f;
+        }
+            
 
         //Check if player land on ground
         if (isOnGround)
@@ -132,7 +136,7 @@ public class PlayerController : MonoBehaviour
         {
             isRolling = true;
             playerAnimation.SetTrigger("Roll");
-            playerRb.velocity = new Vector2(facingDirection * rollForce, playerRb.velocity.y);
+            playerRb.velocity = new Vector2(facingDirection * rollForce, 0);
             //transform.Translate(new Vector2(rollForce * Time.deltaTime * facingDirection, 0));
         }
 
