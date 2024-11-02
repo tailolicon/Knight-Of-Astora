@@ -44,6 +44,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float dashCooldown;
 
 
+
     private Rigidbody2D playerRb;
     private Animator playerAnimation;
 
@@ -147,6 +148,7 @@ public class PlayerController : MonoBehaviour
     {
         if (Input.GetKeyUp(KeyCode.Space) && playerRb.velocity.y > 0)
         {
+            playerAnimation.SetTrigger("Jump");
             playerRb.velocity = new Vector2(playerRb.velocity.x, 0);
         }
 
@@ -177,6 +179,7 @@ public class PlayerController : MonoBehaviour
                 currentAttack = 1;
 
             playerAnimation.SetTrigger("Attack" + currentAttack);
+            
 
             timeSinceAttack = 0f;
         }
