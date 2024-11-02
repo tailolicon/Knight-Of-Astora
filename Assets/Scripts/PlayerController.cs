@@ -7,7 +7,6 @@ public class PlayerController : MonoBehaviour
 {
     //Input
     private float horizontalInput;
-    private int facingDirection;
 
     private bool isOnGround;
 
@@ -27,6 +26,10 @@ public class PlayerController : MonoBehaviour
     //Attacking
     private int currentAttack = 0;
     private float timeSinceAttack;
+    [SerializeField] private float damage = 1f;
+    [SerializeField] Transform SideAttackTransform;
+    [SerializeField] Vector2 SideAttackArea;
+    [SerializeField] LayerMask attackableLayer;
 
     //Double Jump
     private int airJumpCounter = 0;
@@ -98,6 +101,12 @@ public class PlayerController : MonoBehaviour
         StartDash();
     }
 
+    private void OnDrawGizmos()
+    {
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireCube(SideAttackTransform.position, SideAttackArea);
+    }
+
     private void Grounded()
     {
         if (isOnGround)
@@ -116,13 +125,11 @@ public class PlayerController : MonoBehaviour
     {
         if (horizontalInput > 0)
         {
-            GetComponent<SpriteRenderer>().flipX = false;
-            facingDirection = 1;
+            transform.localScale = new Vector2(1, transform.localScale.y); 
         }
         else if (horizontalInput < 0)
         {
-            GetComponent<SpriteRenderer>().flipX = true;
-            facingDirection = -1;
+            transform.localScale = new Vector2(-1, transform.localScale.y);
         }
     }
 
@@ -179,9 +186,25 @@ public class PlayerController : MonoBehaviour
                 currentAttack = 1;
 
             playerAnimation.SetTrigger("Attack" + currentAttack);
-            
-
             timeSinceAttack = 0f;
+
+            Hit(SideAttackTransform, SideAttackArea);
+        }
+    }
+
+    private void Hit(Transform attackTransform, Vector2 attackArea)
+    {
+        Collider2D[] objectsToHit = Physics2D.OverlapBoxAll(attackTransform.position, attackArea, 0, attackableLayer);
+        if (objectsToHit.Length > 0)
+        {
+            Debug.Log("Hit");
+        }
+        for (int i = 0; i < objectsToHit.Length; i++)
+        {
+            if (objectsToHit[i].GetComponent<Enemy>() != null)
+            {
+                objectsToHit[i].GetComponent<Enemy>().EnemyHit(damage); 
+            }
         }
     }
 
@@ -191,7 +214,7 @@ public class PlayerController : MonoBehaviour
         {
             isRolling = true;
             playerAnimation.SetTrigger("Roll");
-            playerRb.velocity = new Vector2(facingDirection * rollForce, 0);
+            playerRb.velocity = new Vector2(rollForce, 0);
             //transform.Translate(new Vector2(rollForce * Time.deltaTime * facingDirection, 0));
         }
     }
@@ -227,7 +250,7 @@ public class PlayerController : MonoBehaviour
         isDashing = true;
         playerAnimation.SetTrigger("Dash");
         playerRb.gravityScale = 0;
-        playerRb.velocity = new Vector2(transform.localScale.x * dashSpeed * facingDirection, 0);
+        playerRb.velocity = new Vector2(transform.localScale.x * dashSpeed, 0);
         yield return new WaitForSeconds(dashTime);
         playerRb.gravityScale = gravity;
         isDashing = false;
