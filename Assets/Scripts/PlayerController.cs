@@ -5,9 +5,9 @@ using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
+    public static PlayerController Instance;
     //Input
     private float horizontalInput;
-    private int facingDirection;
 
     private bool isOnGround;
 
@@ -27,10 +27,21 @@ public class PlayerController : MonoBehaviour
     //Attacking
     private int currentAttack = 0;
     private float timeSinceAttack;
+    [SerializeField] private float damage = 1f;
+    [SerializeField] Transform SideAttackTransform;
+    [SerializeField] Vector2 SideAttackArea;
+    [SerializeField] LayerMask attackableLayer;
 
     //Double Jump
     private int airJumpCounter = 0;
     [SerializeField] private int maxAirJump;
+
+    //Recoil
+    public bool recoilingX = false;
+    public bool lookingRight;
+    [SerializeField] int recoilXStep = 5;
+    [SerializeField] float recoilXSpeed = 100;
+    int stepsXRecoiled;
 
     //Player attributes
     [SerializeField] private float jumpForce;
@@ -44,6 +55,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float dashCooldown;
 
 
+
     private Rigidbody2D playerRb;
     private Animator playerAnimation;
 
@@ -54,6 +66,18 @@ public class PlayerController : MonoBehaviour
         playerAnimation = GetComponent<Animator>();
 
         gravity = playerRb.gravityScale;
+    }
+
+    private void Awake()
+    {
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+        }
+        else
+        {
+            Instance = this;
+        }
     }
 
     // Update is called once per frame
@@ -97,6 +121,17 @@ public class PlayerController : MonoBehaviour
         StartDash();
     }
 
+    private void FixedUpdate()
+    {
+        Recoil();
+    }
+
+    private void OnDrawGizmos()
+    {
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireCube(SideAttackTransform.position, SideAttackArea);
+    }
+
     private void Grounded()
     {
         if (isOnGround)
@@ -115,13 +150,13 @@ public class PlayerController : MonoBehaviour
     {
         if (horizontalInput > 0)
         {
-            GetComponent<SpriteRenderer>().flipX = false;
-            facingDirection = 1;
+            transform.localScale = new Vector2(1, transform.localScale.y); 
+            lookingRight = true;
         }
         else if (horizontalInput < 0)
         {
-            GetComponent<SpriteRenderer>().flipX = true;
-            facingDirection = -1;
+            transform.localScale = new Vector2(-1, transform.localScale.y);
+            lookingRight = false;
         }
     }
 
@@ -147,6 +182,7 @@ public class PlayerController : MonoBehaviour
     {
         if (Input.GetKeyUp(KeyCode.Space) && playerRb.velocity.y > 0)
         {
+            playerAnimation.SetTrigger("Jump");
             playerRb.velocity = new Vector2(playerRb.velocity.x, 0);
         }
 
@@ -165,9 +201,9 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    private void Attack()
+    void Attack()
     {
-        if (Input.GetMouseButtonDown(0) && timeSinceAttack > 0.35f && !isRolling)
+        if (Input.GetMouseButtonDown(0) && timeSinceAttack > 0.5f && !isRolling)
         {
             currentAttack++;
             if (currentAttack > 3)
@@ -177,9 +213,49 @@ public class PlayerController : MonoBehaviour
                 currentAttack = 1;
 
             playerAnimation.SetTrigger("Attack" + currentAttack);
-
             timeSinceAttack = 0f;
+
+            Hit(SideAttackTransform, SideAttackArea, ref recoilingX, recoilXSpeed);
         }
+    }
+
+    void Hit(Transform attackTransform, Vector2 attackArea, ref bool recoilDir, float recoilStrength)
+    {
+        Collider2D[] objectsToHit = Physics2D.OverlapBoxAll(attackTransform.position, attackArea, 0, attackableLayer);
+        if (objectsToHit.Length > 0)
+        {
+            recoilDir = true;
+        }
+        for (int i = 0; i < objectsToHit.Length; i++)
+        {
+            if (objectsToHit[i].GetComponent<Enemy>() != null)
+            {
+                objectsToHit[i].GetComponent<Enemy>().EnemyHit(damage, (-transform.position + objectsToHit[i].transform.position).normalized, recoilStrength); 
+            }
+        }
+    }
+
+    void Recoil()
+    {
+        if (recoilingX)
+        {
+            if (lookingRight)
+            {
+                playerRb.velocity = new Vector2(-recoilXSpeed, 0);
+            }
+            else playerRb.velocity = new Vector2(recoilXSpeed, 0);
+        }
+
+        //Stop Recoil
+        if (recoilingX && stepsXRecoiled < recoilXStep)
+            stepsXRecoiled++;
+        else StopRecoilX();
+    }
+
+    void StopRecoilX()
+    {
+        stepsXRecoiled = 0;
+        recoilingX = false;
     }
 
     private void Roll()
@@ -188,8 +264,7 @@ public class PlayerController : MonoBehaviour
         {
             isRolling = true;
             playerAnimation.SetTrigger("Roll");
-            playerRb.velocity = new Vector2(facingDirection * rollForce, 0);
-            //transform.Translate(new Vector2(rollForce * Time.deltaTime * facingDirection, 0));
+            playerRb.velocity = new Vector2(rollForce * transform.localScale.x, 0);
         }
     }
 
@@ -224,7 +299,7 @@ public class PlayerController : MonoBehaviour
         isDashing = true;
         playerAnimation.SetTrigger("Dash");
         playerRb.gravityScale = 0;
-        playerRb.velocity = new Vector2(transform.localScale.x * dashSpeed * facingDirection, 0);
+        playerRb.velocity = new Vector2(transform.localScale.x * dashSpeed, 0);
         yield return new WaitForSeconds(dashTime);
         playerRb.gravityScale = gravity;
         isDashing = false;
