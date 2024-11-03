@@ -5,6 +5,7 @@ using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
+    public static PlayerController Instance;
     //Input
     private float horizontalInput;
 
@@ -35,6 +36,13 @@ public class PlayerController : MonoBehaviour
     private int airJumpCounter = 0;
     [SerializeField] private int maxAirJump;
 
+    //Recoil
+    public bool recoilingX = false;
+    public bool lookingRight;
+    [SerializeField] int recoilXStep = 5;
+    [SerializeField] float recoilXSpeed = 100;
+    int stepsXRecoiled;
+
     //Player attributes
     [SerializeField] private float jumpForce;
     [SerializeField] private float playerSpeed;
@@ -58,6 +66,18 @@ public class PlayerController : MonoBehaviour
         playerAnimation = GetComponent<Animator>();
 
         gravity = playerRb.gravityScale;
+    }
+
+    private void Awake()
+    {
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+        }
+        else
+        {
+            Instance = this;
+        }
     }
 
     // Update is called once per frame
@@ -101,6 +121,11 @@ public class PlayerController : MonoBehaviour
         StartDash();
     }
 
+    private void FixedUpdate()
+    {
+        Recoil();
+    }
+
     private void OnDrawGizmos()
     {
         Gizmos.color = Color.red;
@@ -126,10 +151,12 @@ public class PlayerController : MonoBehaviour
         if (horizontalInput > 0)
         {
             transform.localScale = new Vector2(1, transform.localScale.y); 
+            lookingRight = true;
         }
         else if (horizontalInput < 0)
         {
             transform.localScale = new Vector2(-1, transform.localScale.y);
+            lookingRight = false;
         }
     }
 
@@ -174,9 +201,9 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    private void Attack()
+    void Attack()
     {
-        if (Input.GetMouseButtonDown(0) && timeSinceAttack > 0.35f && !isRolling)
+        if (Input.GetMouseButtonDown(0) && timeSinceAttack > 0.5f && !isRolling)
         {
             currentAttack++;
             if (currentAttack > 3)
@@ -188,24 +215,47 @@ public class PlayerController : MonoBehaviour
             playerAnimation.SetTrigger("Attack" + currentAttack);
             timeSinceAttack = 0f;
 
-            Hit(SideAttackTransform, SideAttackArea);
+            Hit(SideAttackTransform, SideAttackArea, ref recoilingX, recoilXSpeed);
         }
     }
 
-    private void Hit(Transform attackTransform, Vector2 attackArea)
+    void Hit(Transform attackTransform, Vector2 attackArea, ref bool recoilDir, float recoilStrength)
     {
         Collider2D[] objectsToHit = Physics2D.OverlapBoxAll(attackTransform.position, attackArea, 0, attackableLayer);
         if (objectsToHit.Length > 0)
         {
-            Debug.Log("Hit");
+            recoilDir = true;
         }
         for (int i = 0; i < objectsToHit.Length; i++)
         {
             if (objectsToHit[i].GetComponent<Enemy>() != null)
             {
-                objectsToHit[i].GetComponent<Enemy>().EnemyHit(damage); 
+                objectsToHit[i].GetComponent<Enemy>().EnemyHit(damage, (-transform.position + objectsToHit[i].transform.position).normalized, recoilStrength); 
             }
         }
+    }
+
+    void Recoil()
+    {
+        if (recoilingX)
+        {
+            if (lookingRight)
+            {
+                playerRb.velocity = new Vector2(-recoilXSpeed, 0);
+            }
+            else playerRb.velocity = new Vector2(recoilXSpeed, 0);
+        }
+
+        //Stop Recoil
+        if (recoilingX && stepsXRecoiled < recoilXStep)
+            stepsXRecoiled++;
+        else StopRecoilX();
+    }
+
+    void StopRecoilX()
+    {
+        stepsXRecoiled = 0;
+        recoilingX = false;
     }
 
     private void Roll()
@@ -214,8 +264,7 @@ public class PlayerController : MonoBehaviour
         {
             isRolling = true;
             playerAnimation.SetTrigger("Roll");
-            playerRb.velocity = new Vector2(rollForce, 0);
-            //transform.Translate(new Vector2(rollForce * Time.deltaTime * facingDirection, 0));
+            playerRb.velocity = new Vector2(rollForce * transform.localScale.x, 0);
         }
     }
 

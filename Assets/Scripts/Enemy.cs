@@ -4,25 +4,56 @@ using UnityEngine;
 
 public class Enemy : MonoBehaviour
 {
-    [SerializeField] private float health;
+    [SerializeField] protected float health;
+    [SerializeField] protected float recoilLength;
+    [SerializeField] protected float recoilFactor;
+    [SerializeField] protected bool isRecoiling = false;
 
-    void Start()
+    protected float recoilTimer;
+
+
+    //[SerializeField] protected PlayerController player;
+    //[SerializeField] protected float speed;
+
+    protected Rigidbody2D rb;
+    protected virtual void Start()
     {
         
     }
 
-    // Update is called once per frame
-    void Update()
+    protected virtual void Awake()
     {
-        
+        rb = GetComponent<Rigidbody2D>();
+        //player = PlayerController.Instance;
     }
-
-    public void EnemyHit(float damage)
+    protected virtual void Update()
     {
-        health -= damage;
         if (health <= 0)
         {
             Destroy(gameObject);
+        }
+        if (isRecoiling)
+        {
+            if (recoilTimer < recoilLength)
+            {
+                recoilTimer += Time.deltaTime;
+            }
+            else
+            {
+                isRecoiling = false;
+                recoilTimer = 0;
+            }
+        }
+    }
+
+    public virtual void EnemyHit(float damage, Vector2 hitDirection, float hitForce)
+    {
+        health -= damage;
+        
+        if (!isRecoiling)
+        {
+            rb.AddForce(hitForce * recoilFactor * hitDirection);
+            isRecoiling = true;
         }
     }
 }
