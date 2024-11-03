@@ -47,14 +47,14 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float jumpForce;
     [SerializeField] private float playerSpeed;
     [SerializeField] private float rollForce;
-    //readonly int hitPoints = 5;
-    //public float stamina = 10;
+    public int health = 5;
+    public int maxHealth;
 
     [SerializeField] private float dashSpeed;
     [SerializeField] private float dashTime;
     [SerializeField] private float dashCooldown;
 
-
+    public bool invincible = false;
 
     private Rigidbody2D playerRb;
     private Animator playerAnimation;
@@ -78,6 +78,8 @@ public class PlayerController : MonoBehaviour
         {
             Instance = this;
         }
+
+        Health = maxHealth;
     }
 
     // Update is called once per frame
@@ -256,6 +258,30 @@ public class PlayerController : MonoBehaviour
     {
         stepsXRecoiled = 0;
         recoilingX = false;
+    }
+
+    public void TakeDamage(float damage)
+    {
+        Health -= Mathf.RoundToInt(damage);
+        StartCoroutine(StopTakingDamage());
+    }
+    IEnumerator StopTakingDamage()
+    {
+        invincible = true;
+        playerAnimation.SetTrigger("Hurt");
+        yield return new WaitForSeconds(1f);
+        invincible = false;
+    }
+    public int Health
+    {
+        get { return health; }
+        set
+        {
+            if (health != value)
+            {
+                health = Mathf.Clamp(value, 0, maxHealth);
+            }
+        }
     }
 
     private void Roll()

@@ -9,11 +9,13 @@ public class Enemy : MonoBehaviour
     [SerializeField] protected float recoilFactor;
     [SerializeField] protected bool isRecoiling = false;
 
-    protected float recoilTimer;
+    [SerializeField] protected float recoilTimer;
 
 
-    //[SerializeField] protected PlayerController player;
-    //[SerializeField] protected float speed;
+    [SerializeField] protected PlayerController player;
+    [SerializeField] protected float speed;
+
+    protected float damage = 1;
 
     protected Rigidbody2D rb;
     protected virtual void Start()
@@ -24,7 +26,7 @@ public class Enemy : MonoBehaviour
     protected virtual void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
-        //player = PlayerController.Instance;
+        player = PlayerController.Instance;
     }
     protected virtual void Update()
     {
@@ -55,5 +57,16 @@ public class Enemy : MonoBehaviour
             rb.AddForce(hitForce * recoilFactor * hitDirection);
             isRecoiling = true;
         }
+    }
+    private void OnTriggerStay2D(Collider2D other)
+    {
+        if (other.CompareTag("Player") && !PlayerController.Instance.invincible)
+        {
+            Attack();
+        }
+    }
+    protected virtual void Attack()
+    {
+        PlayerController.Instance.TakeDamage(damage);
     }
 }
