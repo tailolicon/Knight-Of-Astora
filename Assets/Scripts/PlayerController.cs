@@ -1,3 +1,4 @@
+using JetBrains.Annotations;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -33,6 +34,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] LayerMask attackableLayer;
 
     //Double Jump
+    public bool isJumping = false;
     private int airJumpCounter = 0;
     [SerializeField] private int maxAirJump;
 
@@ -43,29 +45,42 @@ public class PlayerController : MonoBehaviour
     [SerializeField] float recoilXSpeed = 100;
     int stepsXRecoiled;
 
+    //Health
+    public bool isHealing;
+    private float healTimer;
+    [SerializeField] float timeToHeal;
+
+    //Mana
+    [SerializeField] float mana;
+    [SerializeField] float manaDrainSpeed;
+    [SerializeField] float manaGain;
+
     //Player attributes
     [SerializeField] private float jumpForce;
     [SerializeField] private float playerSpeed;
     [SerializeField] private float rollForce;
-    //readonly int hitPoints = 5;
-    //public float stamina = 10;
+    public int health;
+    public int maxHealth;
 
     [SerializeField] private float dashSpeed;
     [SerializeField] private float dashTime;
     [SerializeField] private float dashCooldown;
 
-
+    public bool invincible = false;
 
     private Rigidbody2D playerRb;
     private Animator playerAnimation;
+    private BoxCollider2D playerBC;
 
-    // Start is called before the first frame update
     void Start()
     {
         playerRb = GetComponent<Rigidbody2D>();
         playerAnimation = GetComponent<Animator>();
+        playerBC = GetComponent<BoxCollider2D>();
 
         gravity = playerRb.gravityScale;
+
+        Mana = mana;
     }
 
     private void Awake()
@@ -78,9 +93,10 @@ public class PlayerController : MonoBehaviour
         {
             Instance = this;
         }
+
+        Health = maxHealth;
     }
 
-    // Update is called once per frame
     void Update()
     {
         // Set speed when player in the air
@@ -116,9 +132,11 @@ public class PlayerController : MonoBehaviour
         // Roll
         Roll();
         // Block
-        Block();
+        //Block();
         //Dash
         StartDash();
+
+        Heal();
     }
 
     private void FixedUpdate()
@@ -139,6 +157,7 @@ public class PlayerController : MonoBehaviour
             playerAnimation.SetBool("Grounded", true);
             airJumpCounter = 0;
             dashed = false;
+            isJumping = false;
         }
         else
         {
@@ -162,7 +181,7 @@ public class PlayerController : MonoBehaviour
 
     private void Move()
     {
-        if (!isRolling && !isBlocking && !isDashing)
+        if (!isRolling && !isBlocking && !isDashing && !isHealing)
         {
             playerRb.velocity = new Vector2(horizontalInput * playerSpeed, playerRb.velocity.y);
             //transform.Translate(new Vector2(horizontalInput * playerSpeed * Time.deltaTime, 0));
@@ -186,9 +205,9 @@ public class PlayerController : MonoBehaviour
             playerRb.velocity = new Vector2(playerRb.velocity.x, 0);
         }
 
-        if (Input.GetKeyDown(KeyCode.Space) && isOnGround)
+        if (Input.GetKeyDown(KeyCode.Space) && isOnGround && !isRolling && !isHealing)
         {
-
+            isJumping = true;
             isOnGround = false;
             playerAnimation.SetTrigger("Jump");
             playerRb.velocity = new Vector2(playerRb.velocity.x, jumpForce);
@@ -203,7 +222,7 @@ public class PlayerController : MonoBehaviour
 
     void Attack()
     {
-        if (Input.GetMouseButtonDown(0) && timeSinceAttack > 0.5f && !isRolling)
+        if (Input.GetMouseButtonDown(0) && timeSinceAttack > 0.5f && !isRolling && !isHealing)
         {
             currentAttack++;
             if (currentAttack > 3)
@@ -222,6 +241,7 @@ public class PlayerController : MonoBehaviour
     void Hit(Transform attackTransform, Vector2 attackArea, ref bool recoilDir, float recoilStrength)
     {
         Collider2D[] objectsToHit = Physics2D.OverlapBoxAll(attackTransform.position, attackArea, 0, attackableLayer);
+        List<Enemy> hitEnemies = new List<Enemy>();
         if (objectsToHit.Length > 0)
         {
             recoilDir = true;
@@ -230,8 +250,15 @@ public class PlayerController : MonoBehaviour
         {
             if (objectsToHit[i].GetComponent<Enemy>() != null)
             {
-                objectsToHit[i].GetComponent<Enemy>().EnemyHit(damage, (-transform.position + objectsToHit[i].transform.position).normalized, recoilStrength); 
-            }
+                objectsToHit[i].GetComponent<Enemy>().EnemyHit(damage, 
+                    (-transform.position + objectsToHit[i].transform.position).normalized, 
+                    recoilStrength);
+                if (objectsToHit[i].CompareTag("Enemy"))
+                {
+                    Mana += manaGain;
+                }
+            } 
+            
         }
     }
 
@@ -258,17 +285,82 @@ public class PlayerController : MonoBehaviour
         recoilingX = false;
     }
 
+    public void TakeDamage(float damage)
+    {
+        Health -= Mathf.RoundToInt(damage);
+        StartCoroutine(StopTakingDamage());
+    }
+    IEnumerator StopTakingDamage()
+    {
+        invincible = true;
+        playerAnimation.SetTrigger("Hurt");
+        yield return new WaitForSeconds(1f);
+        invincible = false;
+    }
+    public int Health
+    {
+        get { return health; }
+        set
+        {
+            if (health != value)
+            {
+                health = Mathf.Clamp(value, 0, maxHealth);
+            }
+        }
+    }
+    IEnumerator IFrame()
+    {
+        invincible = true;
+        yield return new WaitForSeconds(rollDuration);
+        invincible = false;
+    }
+    void Heal()
+    {
+        if (Input.GetMouseButton(1) && Health < maxHealth && !isRolling && Mana > 0 && !isDashing && !isJumping)
+        {
+            playerRb.velocity = Vector3.zero;
+            isHealing = true;
+            healTimer += Time.deltaTime;
+            playerAnimation.SetBool("Heal", true);
+            
+            if (healTimer >= timeToHeal)
+            {
+                Health++;
+                healTimer = 0;
+            }
+
+            Mana -= Time.deltaTime * manaDrainSpeed; 
+        }
+        else
+        {
+            isHealing = false;
+            playerAnimation.SetBool("Heal", false);
+            healTimer = 0;
+        }
+    }
+    float Mana
+    {
+        get { return mana; }
+        set
+        {
+            if (mana != value)
+            {
+                mana = Mathf.Clamp(value, 0, 1);
+            }
+        }
+    }
     private void Roll()
     {
-        if (Input.GetKeyDown(KeyCode.LeftShift) && isOnGround && !isRolling)
+        if (Input.GetKeyDown(KeyCode.LeftShift) && isOnGround && !isRolling && !isDashing && !isHealing)
         {
             isRolling = true;
             playerAnimation.SetTrigger("Roll");
+            StartCoroutine(IFrame());
             playerRb.velocity = new Vector2(rollForce * transform.localScale.x, 0);
         }
     }
 
-    private void Block()
+    /*private void Block()
     {
         if (Input.GetMouseButtonDown(1) && isOnGround && !isRolling)
         {
@@ -282,11 +374,11 @@ public class PlayerController : MonoBehaviour
             isBlocking = false;
             playerAnimation.SetBool("IdleBlock", false);
         }
-    }
+    }*/
 
     private void StartDash()
     {
-        if (Input.GetKeyDown(KeyCode.LeftControl) && canDash && !dashed && !isBlocking)
+        if (Input.GetKeyDown(KeyCode.LeftControl) && canDash && !dashed && !isBlocking && !isRolling && !isHealing)
         {
             StartCoroutine(Dash());
             dashed = true;
