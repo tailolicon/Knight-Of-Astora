@@ -58,13 +58,15 @@ public class Enemy : MonoBehaviour
             isRecoiling = true;
         }
     }
-    private void OnTriggerStay2D(Collider2D other)
+
+    protected void OnCollisionStay2D(Collision2D other)
     {
-        if (other.CompareTag("Player") && !PlayerController.Instance.invincible)
+        if (other.gameObject.CompareTag("Player") && !PlayerController.Instance.invincible)
         {
             Attack();
         }
     }
+
     protected virtual void Attack()
     {
         PlayerController.Instance.TakeDamage(damage);
