@@ -49,11 +49,13 @@ public class PlayerController : MonoBehaviour
     public bool isHealing;
     private float healTimer;
     [SerializeField] float timeToHeal;
+    public HealController healController;
 
     //Mana
     [SerializeField] float mana;
     [SerializeField] float manaDrainSpeed;
     [SerializeField] float manaGain;
+    public ManaController manaController;
 
     //Player attributes
     [SerializeField] private float jumpForce;
@@ -80,7 +82,11 @@ public class PlayerController : MonoBehaviour
 
         gravity = playerRb.gravityScale;
 
+        Health = maxHealth;
+        healController.SetMaxHealth(Health);
+
         Mana = mana;
+        manaController.SetMaxMana(Mana);
     }
 
     private void Awake()
@@ -93,8 +99,6 @@ public class PlayerController : MonoBehaviour
         {
             Instance = this;
         }
-
-        Health = maxHealth;
     }
 
     void Update()
@@ -241,7 +245,6 @@ public class PlayerController : MonoBehaviour
     void Hit(Transform attackTransform, Vector2 attackArea, ref bool recoilDir, float recoilStrength)
     {
         Collider2D[] objectsToHit = Physics2D.OverlapBoxAll(attackTransform.position, attackArea, 0, attackableLayer);
-        List<Enemy> hitEnemies = new List<Enemy>();
         if (objectsToHit.Length > 0)
         {
             recoilDir = true;
@@ -256,6 +259,7 @@ public class PlayerController : MonoBehaviour
                 if (objectsToHit[i].CompareTag("Enemy"))
                 {
                     Mana += manaGain;
+                    manaController.SetMana(Mana);
                 }
             } 
             
@@ -288,6 +292,7 @@ public class PlayerController : MonoBehaviour
     public void TakeDamage(float damage)
     {
         Health -= Mathf.RoundToInt(damage);
+        healController.SetHealth(Health);
         StartCoroutine(StopTakingDamage());
     }
     IEnumerator StopTakingDamage()
@@ -326,10 +331,12 @@ public class PlayerController : MonoBehaviour
             if (healTimer >= timeToHeal)
             {
                 Health++;
+                healController.SetHealth(Health);
                 healTimer = 0;
             }
 
-            Mana -= Time.deltaTime * manaDrainSpeed; 
+            Mana -= Time.deltaTime * manaDrainSpeed;
+            manaController.SetMana(Mana);
         }
         else
         {
@@ -351,10 +358,12 @@ public class PlayerController : MonoBehaviour
     }
     private void Roll()
     {
-        if (Input.GetKeyDown(KeyCode.LeftShift) && isOnGround && !isRolling && !isDashing && !isHealing)
+        if (Input.GetKeyDown(KeyCode.LeftShift) && Mana >= 0.3f && isOnGround && !isRolling && !isDashing && !isHealing)
         {
             isRolling = true;
             playerAnimation.SetTrigger("Roll");
+            Mana -= 0.3f;
+            manaController.SetMana(Mana);
             StartCoroutine(IFrame());
             playerRb.velocity = new Vector2(rollForce * transform.localScale.x, 0);
         }
