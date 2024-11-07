@@ -497,6 +497,11 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 229982792}
   m_CullTransparentMesh: 1
+--- !u!4 &401443124 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 7697082617433072781, guid: 7d5bff46aefc49548a4a028a71276dba, type: 3}
+  m_PrefabInstance: {fileID: 8600684360611670339}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &519420028
 GameObject:
   m_ObjectHideFlags: 0
@@ -7224,12 +7229,20 @@ PrefabInstance:
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 970128306319859662, guid: 7d5bff46aefc49548a4a028a71276dba, type: 3}
+      propertyPath: health
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 970128306319859662, guid: 7d5bff46aefc49548a4a028a71276dba, type: 3}
+      propertyPath: dashTime
+      value: 0.3
+      objectReference: {fileID: 0}
+    - target: {fileID: 970128306319859662, guid: 7d5bff46aefc49548a4a028a71276dba, type: 3}
       propertyPath: manaGain
-      value: 0.1
+      value: 0.2
       objectReference: {fileID: 0}
     - target: {fileID: 970128306319859662, guid: 7d5bff46aefc49548a4a028a71276dba, type: 3}
       propertyPath: dashSpeed
-      value: 30
+      value: 25
       objectReference: {fileID: 0}
     - target: {fileID: 970128306319859662, guid: 7d5bff46aefc49548a4a028a71276dba, type: 3}
       propertyPath: healTimer
@@ -7237,7 +7250,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 970128306319859662, guid: 7d5bff46aefc49548a4a028a71276dba, type: 3}
       propertyPath: jumpForce
-      value: 15
+      value: 20
       objectReference: {fileID: 0}
     - target: {fileID: 970128306319859662, guid: 7d5bff46aefc49548a4a028a71276dba, type: 3}
       propertyPath: maxHealth
@@ -7248,12 +7261,28 @@ PrefabInstance:
       value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 970128306319859662, guid: 7d5bff46aefc49548a4a028a71276dba, type: 3}
+      propertyPath: maxAirJump
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 970128306319859662, guid: 7d5bff46aefc49548a4a028a71276dba, type: 3}
       propertyPath: timeToHeal
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 970128306319859662, guid: 7d5bff46aefc49548a4a028a71276dba, type: 3}
       propertyPath: playerSpeed
       value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 970128306319859662, guid: 7d5bff46aefc49548a4a028a71276dba, type: 3}
+      propertyPath: dashCooldown
+      value: 0.35
+      objectReference: {fileID: 0}
+    - target: {fileID: 970128306319859662, guid: 7d5bff46aefc49548a4a028a71276dba, type: 3}
+      propertyPath: lookingRight
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 970128306319859662, guid: 7d5bff46aefc49548a4a028a71276dba, type: 3}
+      propertyPath: recoilXSpeed
+      value: 100
       objectReference: {fileID: 0}
     - target: {fileID: 970128306319859662, guid: 7d5bff46aefc49548a4a028a71276dba, type: 3}
       propertyPath: healController
@@ -7265,15 +7294,23 @@ PrefabInstance:
       objectReference: {fileID: 826273219}
     - target: {fileID: 970128306319859662, guid: 7d5bff46aefc49548a4a028a71276dba, type: 3}
       propertyPath: manaDrainSpeed
-      value: 0.2
+      value: 0.3
       objectReference: {fileID: 0}
     - target: {fileID: 970128306319859662, guid: 7d5bff46aefc49548a4a028a71276dba, type: 3}
       propertyPath: SideAttackArea.x
-      value: 3
+      value: 3.5
       objectReference: {fileID: 0}
     - target: {fileID: 970128306319859662, guid: 7d5bff46aefc49548a4a028a71276dba, type: 3}
       propertyPath: SideAttackArea.y
-      value: 2.6
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 970128306319859662, guid: 7d5bff46aefc49548a4a028a71276dba, type: 3}
+      propertyPath: SideAttackTransform
+      value: 
+      objectReference: {fileID: 401443124}
+    - target: {fileID: 970128306319859662, guid: 7d5bff46aefc49548a4a028a71276dba, type: 3}
+      propertyPath: attackableLayer.m_Bits
+      value: 64
       objectReference: {fileID: 0}
     - target: {fileID: 1112846277768009821, guid: 7d5bff46aefc49548a4a028a71276dba, type: 3}
       propertyPath: m_GravityScale
