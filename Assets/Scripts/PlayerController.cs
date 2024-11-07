@@ -10,21 +10,30 @@ public class PlayerController : MonoBehaviour
     //Input
     private float horizontalInput;
 
-    private bool isOnGround;
+    [SerializeField] private float playerSpeed;
 
+    [Header("Player state")]
+    private bool isOnGround;
     private bool isBlocking;
 
+    [Header("Roll")]
     //Rolling
     private bool isRolling;
     private float rollDuration = 0.5f;
     private float rollCurrentTime;
+    [SerializeField] private float rollForce;
 
+    [Header("Dash")]
     //Dashing
     private bool canDash = true;
     private bool dashed;
     private bool isDashing = false;
     private float gravity;
+    [SerializeField] private float dashSpeed;
+    [SerializeField] private float dashTime;
+    [SerializeField] private float dashCooldown;
 
+    [Header("Attack")]
     //Attacking
     private int currentAttack = 0;
     private float timeSinceAttack;
@@ -33,11 +42,14 @@ public class PlayerController : MonoBehaviour
     [SerializeField] Vector2 SideAttackArea;
     [SerializeField] LayerMask attackableLayer;
 
+    [Header("Jump")]
     //Double Jump
+    [SerializeField] private float jumpForce;
     public bool isJumping = false;
     private int airJumpCounter = 0;
     [SerializeField] private int maxAirJump;
 
+    [Header("Recoil")]
     //Recoil
     public bool recoilingX = false;
     public bool lookingRight;
@@ -45,28 +57,21 @@ public class PlayerController : MonoBehaviour
     [SerializeField] float recoilXSpeed = 100;
     int stepsXRecoiled;
 
+    [Header("Heal")]
     //Health
+    public int health;
+    public int maxHealth;
     public bool isHealing;
     private float healTimer;
     [SerializeField] float timeToHeal;
     public HealController healController;
 
+    [Header("Mana")]
     //Mana
     [SerializeField] float mana;
     [SerializeField] float manaDrainSpeed;
     [SerializeField] float manaGain;
     public ManaController manaController;
-
-    //Player attributes
-    [SerializeField] private float jumpForce;
-    [SerializeField] private float playerSpeed;
-    [SerializeField] private float rollForce;
-    public int health;
-    public int maxHealth;
-
-    [SerializeField] private float dashSpeed;
-    [SerializeField] private float dashTime;
-    [SerializeField] private float dashCooldown;
 
     public bool invincible = false;
 
