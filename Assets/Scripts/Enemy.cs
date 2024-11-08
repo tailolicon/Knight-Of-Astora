@@ -61,7 +61,7 @@ public class Enemy : MonoBehaviour
 
     protected void OnCollisionStay2D(Collision2D other)
     {
-        if (other.gameObject.CompareTag("Player") && !PlayerController.Instance.invincible)
+        if (other.gameObject.CompareTag("Player") && !PlayerController.Instance.playerState.invincible)
         {
             Attack();
         }

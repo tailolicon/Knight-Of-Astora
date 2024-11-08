@@ -7,18 +7,15 @@ using UnityEngine;
 public class PlayerController : MonoBehaviour
 {
     public static PlayerController Instance;
+    
+    [Header("Player state")]
+    public PlayerState playerState;
     //Input
     private float horizontalInput;
-
     [SerializeField] private float playerSpeed;
-
-    [Header("Player state")]
-    private bool isOnGround;
-    private bool isBlocking;
 
     [Header("Roll")]
     //Rolling
-    private bool isRolling;
     private float rollDuration = 0.5f;
     private float rollCurrentTime;
     [SerializeField] private float rollForce;
@@ -27,7 +24,6 @@ public class PlayerController : MonoBehaviour
     //Dashing
     private bool canDash = true;
     private bool dashed;
-    private bool isDashing = false;
     private float gravity;
     [SerializeField] private float dashSpeed;
     [SerializeField] private float dashTime;
@@ -45,14 +41,11 @@ public class PlayerController : MonoBehaviour
     [Header("Jump")]
     //Double Jump
     [SerializeField] private float jumpForce;
-    public bool isJumping = false;
     private int airJumpCounter = 0;
     [SerializeField] private int maxAirJump;
 
     [Header("Recoil")]
     //Recoil
-    public bool recoilingX = false;
-    public bool lookingRight;
     [SerializeField] int recoilXStep = 5;
     [SerializeField] float recoilXSpeed = 100;
     int stepsXRecoiled;
@@ -61,7 +54,6 @@ public class PlayerController : MonoBehaviour
     //Health
     public int health;
     public int maxHealth;
-    public bool isHealing;
     private float healTimer;
     [SerializeField] float timeToHeal;
     public HealController healController;
@@ -72,8 +64,6 @@ public class PlayerController : MonoBehaviour
     [SerializeField] float manaDrainSpeed;
     [SerializeField] float manaGain;
     public ManaController manaController;
-
-    public bool invincible = false;
 
     private Rigidbody2D playerRb;
     private Animator playerAnimation;
@@ -115,85 +105,66 @@ public class PlayerController : MonoBehaviour
         timeSinceAttack += Time.deltaTime;
 
         // Increase timer that checks roll duration
-        if (isRolling)
+        if (playerState.isRolling)
             rollCurrentTime += Time.deltaTime;
         // Disable rolling if timer extends duration
         if (rollCurrentTime > rollDuration)
         {
-            isRolling = false;
+            playerState.isRolling = false;
             rollCurrentTime = 0f;
         }
-
-
         //Check if player land on ground
         Grounded();
-
-        //Handle Input Movement
         horizontalInput = Input.GetAxis("Horizontal");
-        //Flip
         Flip();
-        // Move
         Move();
-        // Jump
         Jump();
-        // Attack
         Attack();
-        // Roll
         Roll();
-        // Block
-        //Block();
-        //Dash
         StartDash();
-
         Heal();
     }
-
     private void FixedUpdate()
     {
         Recoil();
     }
-
     private void OnDrawGizmos()
     {
         Gizmos.color = Color.red;
         Gizmos.DrawWireCube(SideAttackTransform.position, SideAttackArea);
     }
-
     private void Grounded()
     {
-        if (isOnGround)
+        if (playerState.isOnGround)
         {
             playerAnimation.SetBool("Grounded", true);
             airJumpCounter = 0;
             dashed = false;
-            isJumping = false;
+            playerState.isJumping = false;
         }
         else
         {
             playerAnimation.SetBool("Grounded", false);
         }
     }
-
     private void Flip()
     {
         if (horizontalInput > 0)
         {
             transform.localScale = new Vector2(1, transform.localScale.y); 
-            lookingRight = true;
+            playerState.lookingRight = true;
         }
         else if (horizontalInput < 0)
         {
             transform.localScale = new Vector2(-1, transform.localScale.y);
-            lookingRight = false;
+            playerState.lookingRight = false;
         }
     }
-
     private void Move()
     {
-        if (!isRolling && !isBlocking && !isDashing && !isHealing)
+        if (!playerState.isRolling && !playerState.isDashing && !playerState.isHealing)
         {
-            playerRb.velocity = new Vector2(horizontalInput * playerSpeed, playerRb.velocity.y);
-            //transform.Translate(new Vector2(horizontalInput * playerSpeed * Time.deltaTime, 0));
+            playerRb.velocity = new Vector2(horizontalInput * playerSpeed, playerRb.velocity.y);    
         }
 
         if (horizontalInput != 0)
@@ -214,24 +185,23 @@ public class PlayerController : MonoBehaviour
             playerRb.velocity = new Vector2(playerRb.velocity.x, 0);
         }
 
-        if (Input.GetKeyDown(KeyCode.Space) && isOnGround && !isRolling && !isHealing)
+        if (Input.GetKeyDown(KeyCode.Space) && playerState.isOnGround && !playerState.isRolling && !playerState.isHealing)
         {
-            isJumping = true;
-            isOnGround = false;
+            playerState.isJumping = true;
+            playerState.isOnGround = false;
             playerAnimation.SetTrigger("Jump");
             playerRb.velocity = new Vector2(playerRb.velocity.x, jumpForce);
         }
-        else if (!isOnGround && airJumpCounter < maxAirJump && Input.GetKeyDown(KeyCode.Space))
+        else if (!playerState.isOnGround && airJumpCounter < maxAirJump && Input.GetKeyDown(KeyCode.Space))
         {
             airJumpCounter++;
             playerAnimation.SetTrigger("Jump");
             playerRb.velocity = new Vector2(playerRb.velocity.x, jumpForce);
         }
     }
-
     void Attack()
     {
-        if (Input.GetMouseButtonDown(0) && timeSinceAttack > 0.5f && !isRolling && !isHealing)
+        if (Input.GetMouseButtonDown(0) && timeSinceAttack > 0.5f && !playerState.isRolling && !playerState.isHealing)
         {
             currentAttack++;
             if (currentAttack > 3)
@@ -243,10 +213,9 @@ public class PlayerController : MonoBehaviour
             playerAnimation.SetTrigger("Attack" + currentAttack);
             timeSinceAttack = 0f;
 
-            Hit(SideAttackTransform, SideAttackArea, ref recoilingX, recoilXSpeed);
+            Hit(SideAttackTransform, SideAttackArea, ref playerState.recoilingX, recoilXSpeed);
         }
     }
-
     void Hit(Transform attackTransform, Vector2 attackArea, ref bool recoilDir, float recoilStrength)
     {
         Collider2D[] objectsToHit = Physics2D.OverlapBoxAll(attackTransform.position, attackArea, 0, attackableLayer);
@@ -270,12 +239,11 @@ public class PlayerController : MonoBehaviour
             
         }
     }
-
     void Recoil()
     {
-        if (recoilingX)
+        if (playerState.recoilingX)
         {
-            if (lookingRight)
+            if (playerState.lookingRight)
             {
                 playerRb.velocity = new Vector2(-recoilXSpeed, 0);
             }
@@ -283,17 +251,15 @@ public class PlayerController : MonoBehaviour
         }
 
         //Stop Recoil
-        if (recoilingX && stepsXRecoiled < recoilXStep)
+        if (playerState.recoilingX && stepsXRecoiled < recoilXStep)
             stepsXRecoiled++;
         else StopRecoilX();
     }
-
     void StopRecoilX()
     {
         stepsXRecoiled = 0;
-        recoilingX = false;
+        playerState.recoilingX = false;
     }
-
     public void TakeDamage(float damage)
     {
         Health -= Mathf.RoundToInt(damage);
@@ -302,10 +268,10 @@ public class PlayerController : MonoBehaviour
     }
     IEnumerator StopTakingDamage()
     {
-        invincible = true;
+        playerState.invincible = true;
         playerAnimation.SetTrigger("Hurt");
         yield return new WaitForSeconds(1f);
-        invincible = false;
+        playerState.invincible = false;
     }
     public int Health
     {
@@ -320,16 +286,16 @@ public class PlayerController : MonoBehaviour
     }
     IEnumerator IFrame()
     {
-        invincible = true;
+        playerState.invincible = true;
         yield return new WaitForSeconds(rollDuration);
-        invincible = false;
+        playerState.invincible = false;
     }
     void Heal()
     {
-        if (Input.GetMouseButton(1) && Health < maxHealth && !isRolling && Mana > 0 && !isDashing && !isJumping)
+        if (Input.GetMouseButton(1) && Health < maxHealth && !playerState.isRolling && Mana > 0 && !playerState.isDashing && !playerState.isJumping)
         {
             playerRb.velocity = Vector3.zero;
-            isHealing = true;
+            playerState.isHealing = true;
             healTimer += Time.deltaTime;
             playerAnimation.SetBool("Heal", true);
             
@@ -345,7 +311,7 @@ public class PlayerController : MonoBehaviour
         }
         else
         {
-            isHealing = false;
+            playerState.isHealing = false;
             playerAnimation.SetBool("Heal", false);
             healTimer = 0;
         }
@@ -363,9 +329,9 @@ public class PlayerController : MonoBehaviour
     }
     private void Roll()
     {
-        if (Input.GetKeyDown(KeyCode.LeftShift) && Mana >= 0.3f && isOnGround && !isRolling && !isDashing && !isHealing)
+        if (Input.GetKeyDown(KeyCode.LeftShift) && Mana >= 0.3f && playerState.isOnGround && !playerState.isRolling && !playerState.isDashing && !playerState.isHealing)
         {
-            isRolling = true;
+            playerState.isRolling = true;
             playerAnimation.SetTrigger("Roll");
             Mana -= 0.3f;
             manaController.SetMana(Mana);
@@ -373,51 +339,32 @@ public class PlayerController : MonoBehaviour
             playerRb.velocity = new Vector2(rollForce * transform.localScale.x, 0);
         }
     }
-
-    /*private void Block()
-    {
-        if (Input.GetMouseButtonDown(1) && isOnGround && !isRolling)
-        {
-            isBlocking = true;
-            playerRb.velocity = Vector2.zero;
-            playerAnimation.SetTrigger("Block");
-            playerAnimation.SetBool("IdleBlock", true);
-        }
-        else if (Input.GetMouseButtonUp(1))
-        {
-            isBlocking = false;
-            playerAnimation.SetBool("IdleBlock", false);
-        }
-    }*/
-
     private void StartDash()
     {
-        if (Input.GetKeyDown(KeyCode.LeftControl) && canDash && !dashed && !isBlocking && !isRolling && !isHealing)
+        if (Input.GetKeyDown(KeyCode.LeftControl) && canDash && !dashed && !playerState.isRolling && !playerState.isHealing)
         {
             StartCoroutine(Dash());
             dashed = true;
         }
     }
-
     IEnumerator Dash()
     {
         canDash = false;
-        isDashing = true;
+        playerState.isDashing = true;
         playerAnimation.SetTrigger("Dash");
         playerRb.gravityScale = 0;
         playerRb.velocity = new Vector2(transform.localScale.x * dashSpeed, 0);
         yield return new WaitForSeconds(dashTime);
         playerRb.gravityScale = gravity;
-        isDashing = false;
+        playerState.isDashing = false;
         yield return new WaitForSeconds(dashCooldown);
         canDash = true;
     }
-
     private void OnCollisionEnter2D(Collision2D collision)
     {
         if (collision.gameObject.CompareTag("Ground"))
         {
-            isOnGround = true;
+            playerState.isOnGround = true;
         }
     }
 }
