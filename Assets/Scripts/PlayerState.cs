@@ -4,7 +4,6 @@ using UnityEngine;
 
 public class PlayerState : MonoBehaviour
 {
-    public bool isOnGround;
     public bool isRolling;
     public bool isDashing = false;
     public bool isJumping = false;
