@@ -23,9 +23,4 @@ public class Skeleton : Enemy
                 speed * Time.deltaTime);
         }
     }
-
-    public override void EnemyHit(float damage, Vector2 hitDirection, float hitForce)
-    {
-        base.EnemyHit(damage, hitDirection, hitForce);
-    }
 }

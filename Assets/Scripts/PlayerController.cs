@@ -39,7 +39,9 @@ public class PlayerController : MonoBehaviour
     [SerializeField] LayerMask attackableLayer;
 
     [Header("Jump")]
-    //Double Jump
+    [SerializeField] private Transform groundCheckPoint;
+    [SerializeField] private LayerMask groundCheckLayer;
+    [SerializeField] private float groundCheckDistance;
     [SerializeField] private float jumpForce;
     private int airJumpCounter = 0;
     [SerializeField] private int maxAirJump;
@@ -98,6 +100,7 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
+        horizontalInput = Input.GetAxis("Horizontal");
         // Set speed when player in the air
         playerAnimation.SetFloat("AirSpeedY", playerRb.velocity.y);
 
@@ -115,7 +118,7 @@ public class PlayerController : MonoBehaviour
         }
         //Check if player land on ground
         Grounded();
-        horizontalInput = Input.GetAxis("Horizontal");
+        
         Flip();
         Move();
         Jump();
@@ -133,9 +136,17 @@ public class PlayerController : MonoBehaviour
         Gizmos.color = Color.red;
         Gizmos.DrawWireCube(SideAttackTransform.position, SideAttackArea);
     }
+    private bool IsOnGround()
+    {
+        if (Physics2D.Raycast(groundCheckPoint.position, Vector2.down, groundCheckDistance, groundCheckLayer))
+        {
+            return true;
+        }
+        else return false;
+    }
     private void Grounded()
     {
-        if (playerState.isOnGround)
+        if (IsOnGround())
         {
             playerAnimation.SetBool("Grounded", true);
             airJumpCounter = 0;
@@ -185,14 +196,14 @@ public class PlayerController : MonoBehaviour
             playerRb.velocity = new Vector2(playerRb.velocity.x, 0);
         }
 
-        if (Input.GetKeyDown(KeyCode.Space) && playerState.isOnGround && !playerState.isRolling && !playerState.isHealing)
+        if (Input.GetKeyDown(KeyCode.Space) && IsOnGround() && !playerState.isRolling && !playerState.isHealing)
         {
             playerState.isJumping = true;
-            playerState.isOnGround = false;
+            //playerState.isOnGround = false;
             playerAnimation.SetTrigger("Jump");
             playerRb.velocity = new Vector2(playerRb.velocity.x, jumpForce);
         }
-        else if (!playerState.isOnGround && airJumpCounter < maxAirJump && Input.GetKeyDown(KeyCode.Space))
+        else if (!IsOnGround() && airJumpCounter < maxAirJump && Input.GetKeyDown(KeyCode.Space))
         {
             airJumpCounter++;
             playerAnimation.SetTrigger("Jump");
@@ -329,7 +340,7 @@ public class PlayerController : MonoBehaviour
     }
     private void Roll()
     {
-        if (Input.GetKeyDown(KeyCode.LeftShift) && Mana >= 0.3f && playerState.isOnGround && !playerState.isRolling && !playerState.isDashing && !playerState.isHealing)
+        if (Input.GetKeyDown(KeyCode.LeftShift) && Mana >= 0.3f && IsOnGround() && !playerState.isRolling && !playerState.isDashing && !playerState.isHealing)
         {
             playerState.isRolling = true;
             playerAnimation.SetTrigger("Roll");
@@ -359,12 +370,5 @@ public class PlayerController : MonoBehaviour
         playerState.isDashing = false;
         yield return new WaitForSeconds(dashCooldown);
         canDash = true;
-    }
-    private void OnCollisionEnter2D(Collision2D collision)
-    {
-        if (collision.gameObject.CompareTag("Ground"))
-        {
-            playerState.isOnGround = true;
-        }
     }
 }

@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 1112846277768009821}
   - component: {fileID: 4312455625691553630}
   - component: {fileID: 970128306319859662}
+  - component: {fileID: 5125890170233402065}
   - component: {fileID: 56074413742692360}
   m_Layer: 0
   m_Name: Player
@@ -35,6 +36,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 7697082617433072781}
+  - {fileID: 1640986507855607739}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!212 &383840766318048394
@@ -104,7 +106,7 @@ Rigidbody2D:
   m_Mass: 1
   m_LinearDrag: 0
   m_AngularDrag: 0.05
-  m_GravityScale: 1
+  m_GravityScale: 3
   m_Material: {fileID: 6200000, guid: 8de63e668aaaac64c99247cca7a30627, type: 2}
   m_IncludeLayers:
     serializedVersion: 2
@@ -148,7 +150,7 @@ BoxCollider2D:
   m_IsTrigger: 0
   m_UsedByEffector: 0
   m_UsedByComposite: 0
-  m_Offset: {x: -0.112107754, y: 1.432975}
+  m_Offset: {x: -0.11915779, y: 1.3518858}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0}
@@ -159,7 +161,7 @@ BoxCollider2D:
     adaptiveTiling: 0
   m_AutoTiling: 0
   serializedVersion: 2
-  m_Size: {x: 1.8568373, y: 2.6888833}
+  m_Size: {x: 1.8181953, y: 2.6834679}
   m_EdgeRadius: 0
 --- !u!114 &970128306319859662
 MonoBehaviour:
@@ -173,25 +175,53 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 67cb7d7d956b3ab488a15947fc1f6476, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  playerState: {fileID: 5125890170233402065}
+  playerSpeed: 10
+  rollForce: 10
+  dashSpeed: 25
+  dashTime: 0.3
+  dashCooldown: 0.35
   damage: 1
   SideAttackTransform: {fileID: 7697082617433072781}
-  SideAttackArea: {x: 3, y: 2.5}
+  SideAttackArea: {x: 3.5, y: 3}
   attackableLayer:
     serializedVersion: 2
     m_Bits: 64
+  groundCheckPoint: {fileID: 1640986507855607739}
+  groundCheckLayer:
+    serializedVersion: 2
+    m_Bits: 8
+  groundCheckDistance: 0.2
+  jumpForce: 20
   maxAirJump: 1
-  recoilingX: 0
-  lookingRight: 1
   recoilXStep: 5
-  recoilXSpeed: 30
-  jumpForce: 7
-  playerSpeed: 8
-  rollForce: 6
-  health: 5
+  recoilXSpeed: 20
+  health: 0
   maxHealth: 5
-  dashSpeed: 25
-  dashTime: 0.2
-  dashCooldown: 0.35
+  timeToHeal: 1
+  healController: {fileID: 0}
+  mana: 1
+  manaDrainSpeed: 0.3
+  manaGain: 0.2
+  manaController: {fileID: 0}
+--- !u!114 &5125890170233402065
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 539999121136366086}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 71a4441305fb6be4aa2f495df44fd30e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  isRolling: 0
+  isDashing: 0
+  isJumping: 0
+  recoilingX: 0
+  lookingRight: 0
+  isHealing: 0
   invincible: 0
 --- !u!95 &56074413742692360
 Animator:
@@ -240,6 +270,37 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 1.5, y: 1.4, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 6597577238280649097}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &8524768214053886165
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1640986507855607739}
+  m_Layer: 0
+  m_Name: GroundCheck
+  m_TagString: Untagged
+  m_Icon: {fileID: 5721338939258241955, guid: 0000000000000000d000000000000000, type: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1640986507855607739
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8524768214053886165}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0.15, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
